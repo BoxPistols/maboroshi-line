@@ -1,0 +1,22 @@
+{
+  "name": "まぼろし線",
+  "short_name": "まぼろし線",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#060b18",
+  "theme_color": "#060b18",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "description": "一本の線路でつながる8つの架空の世界を、汽車で旅して眺める景色"
+}
