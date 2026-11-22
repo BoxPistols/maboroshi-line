@@ -1954,7 +1954,7 @@ function buildGreen(seed){
   const pls=[],lampPos=[];for(let z=-45;z<=45;z+=15){lampAt(-16.2,z);lampAt(16.2,z);}
   /* 池: 睡蓮と光る蓮、錦鯉 */
   const pond=new T.Mesh(new T.CircleGeometry(9,40),new T.MeshStandardMaterial({color:0x0c2422,roughness:.08,metalness:.85,transparent:true,opacity:.62,depthWrite:false}));pond.rotation.x=-PI/2;pond.position.y=.4;pond.userData.pick='water';W.add(pond);
-  {const bed=new T.Mesh(new T.CircleGeometry(9.1,40),new T.MeshStandardMaterial({color:0x0e1a14,roughness:1}));bed.rotation.x=-PI/2;bed.position.y=.06;bed.renderOrder=-1;bed.userData.pick='water';W.add(bed);}
+  {const bed=new T.Mesh(new T.CircleGeometry(9.1,40),new T.MeshStandardMaterial({color:0x34463a,roughness:1}));bed.rotation.x=-PI/2;bed.position.y=.06;bed.renderOrder=-1;bed.userData.pick='water';W.add(bed);}
   const rim=new T.Mesh(new T.TorusGeometry(9.2,.45,8,48),new T.MeshStandardMaterial({map:ashlarTex('rgb(120,116,108)',[8,1]).map,color:0xb8b4ac,roughness:1}));rim.rotation.x=-PI/2;rim.position.y=.3;W.add(rim);
   const padM=new T.MeshStandardMaterial({map:leafTex(0x2e6a3a,'round'),transparent:true,alphaTest:.5,roughness:.8,side:T.DoubleSide,color:0xbfd8b0});
   for(let i=0;i<22;i++){const a=R()*6.28,r=rr(1,8),s=rr(.6,1.4),p=new T.Mesh(new T.PlaneGeometry(1,1),padM);p.rotation.set(-PI/2,0,R()*6.28);p.scale.setScalar(s);p.position.set(Math.cos(a)*r,.43,Math.sin(a)*r);W.add(p);}
@@ -1999,21 +1999,21 @@ function buildGreen(seed){
   /* ---- 食虫植物 ---- */
   const vcol=(g,f)=>{const pa=g.attributes.position,c=new Float32Array(pa.count*3),C=new T.Color();for(let i=0;i<pa.count;i++){f(pa.getY(i),C);c[i*3]=C.r;c[i*3+1]=C.g;c[i*3+2]=C.b;}g.setAttribute('color',new T.BufferAttribute(c,3));return g;};
   const plantM=new T.MeshStandardMaterial({vertexColors:true,roughness:.55,side:T.DoubleSide});
-  const gC=new T.Color(0x5a8a3a),rC=new T.Color(0x9a2e2a),wC=new T.Color(0xc8b070);
+  const gC=new T.Color(0x6a9a48),rC=new T.Color(0xb86a56),wC=new T.Color(0xd8c088);
   /* ウツボカズラ: 古い石の鉢から蔓が垂れ、袋が下がる */
   const pitG=vcol(new T.LatheGeometry([[0,0],[.1,.02],[.19,.1],[.22,.22],[.18,.36],[.12,.46],[.13,.53],[.18,.57],[.16,.59]].map(([x,y])=>new T.Vector2(x,y)),22),(y,C)=>{const k=y/.59;C.copy(gC).lerp(rC,Math.min(1,k*1.25));if(k>.93)C.lerp(wC,.5);});
-  const lidG=new T.CircleGeometry(.17,20);lidG.scale(1,1.25,1);
+  const lidG=vcol(new T.CircleGeometry(.17,20),(y,C)=>{C.copy(gC).lerp(rC,.3+y*.6).multiplyScalar(.85);});lidG.scale(1,1.25,1);
   const urnG=new T.LatheGeometry([[0,0],[.5,0],[.55,.12],[.35,.3],[.32,.6],[.6,1.0],[.9,1.35],[.95,1.5],[.85,1.52]].map(([x,y])=>new T.Vector2(x,y)),28),urnM=new T.MeshStandardMaterial({map:ashlarTex('rgb(150,146,136)',[3,1]).map,color:0xc8c2b4,roughness:.95});
   const pitchers=[];const urnAt=(x,z)=>{const g=new T.Group();g.position.set(x,0,z);const u=new T.Mesh(urnG,urnM);u.scale.setScalar(1.1);g.add(u);
     for(let i=0;i<7;i++){const a=i/7*6.28,l=new T.Mesh(bigG,bigM);l.scale.setScalar(.45);l.position.set(Math.cos(a)*.4,1.6,Math.sin(a)*.4);l.rotation.set(-1.0,-a+PI/2,0,'YXZ');g.add(l);}
     for(let i=0;i<5;i++){const a=i/5*6.28+.3,rx=Math.cos(a),rz=Math.sin(a),len=rr(.9,1.8),top=new T.Vector3(rx*1.0,1.62,rz*1.0),bot=new T.Vector3(rx*1.35,1.62-len,rz*1.35);
       const c=new T.QuadraticBezierCurve3(top,new T.Vector3(rx*1.5,1.5,rz*1.5),bot.clone().add(new T.Vector3(0,.6,0)));const tl=new T.Line(new T.BufferGeometry().setFromPoints(c.getPoints(14)),new T.LineBasicMaterial({color:0x4a6a34}));g.add(tl);
-      const pg=new T.Group();pg.position.copy(bot);const pm=new T.Mesh(pitG,plantM);pg.add(pm);const fl=new T.Mesh(new T.CircleGeometry(.12,18),new T.MeshStandardMaterial({color:0x8a7a3a,roughness:.3,metalness:.1}));fl.rotation.x=-PI/2;fl.position.y=.47;pg.add(fl);const lid=new T.Mesh(lidG,plantM);lid.position.set(-.04,.68,0);lid.rotation.set(-1.1,0,.2);pg.add(lid);pg.rotation.y=-a;pg.traverse(o=>{o.userData.pick='pitcher';});g.add(pg);pitchers.push({pg,lid,ph:R()*6,sw:0});}
+      const pg=new T.Group();pg.position.copy(bot);const pm=new T.Mesh(pitG,plantM);pg.add(pm);const fl=new T.Mesh(new T.CircleGeometry(.12,18),new T.MeshStandardMaterial({color:0xc8b47a,roughness:.3,metalness:.05,emissive:0x3a2a10,emissiveIntensity:.4}));fl.rotation.x=-PI/2;fl.position.y=.47;pg.add(fl);const lid=new T.Mesh(lidG,plantM);lid.position.set(-.04,.68,0);lid.rotation.set(-1.1,0,.2);pg.add(lid);pg.rotation.y=-a;pg.traverse(o=>{o.userData.pick='pitcher';});g.add(pg);pitchers.push({pg,lid,ph:R()*6,sw:0});}
     g.userData.pick='pitcher';W.add(g);};
   [[-7,22],[7,22],[-7,-22],[7,-22]].forEach(([x,z])=>urnAt(x,z));
   /* サラセニア: 池のほとりに、赤い脈の入った細いラッパ */
   const sarG=vcol(new T.LatheGeometry([[.02,0],[.04,.2],[.06,.5],[.09,.8],[.13,.98],[.15,1.04]].map(([x,y])=>new T.Vector2(x,y)),16),(y,C)=>{C.copy(gC).lerp(rC,Math.max(0,(y-.5)*1.6));});
-  const hoodG=new T.CircleGeometry(.17,18);hoodG.scale(1,1.2,1);
+  const hoodG=vcol(new T.CircleGeometry(.17,18),(y,C)=>{C.copy(gC).lerp(rC,Math.min(.85,.45+y*.8)).multiplyScalar(.82);});hoodG.scale(1,1.2,1);
   const sarI=new T.InstancedMesh(sarG,plantM,54),sarH=new T.InstancedMesh(hoodG,plantM,54),sarO=new T.Object3D(),hoodM=new T.Matrix4().compose(new T.Vector3(0,1.06,-.06),new T.Quaternion().setFromEuler(new T.Euler(-.5,0,0)),new T.Vector3(1,1,1));let sarN=0;sarI.userData.pick=sarH.userData.pick='pitcher';W.add(sarI,sarH);
   for(let c=0;c<6;c++){const a=c/6*6.28+.5,r=12.2,cx=Math.cos(a)*r,cz=Math.sin(a)*r;if(Math.abs(Math.abs(cx)-14)<2.5||Math.abs(cz)<2.5)continue;
     for(let i=0;i<9;i++){const g=sarO,h=rr(.9,1.7);g.position.set(cx+rr(-.9,.9),0,cz+rr(-.9,.9));g.rotation.set(rr(-.15,.15),R()*6.28,rr(-.15,.15));g.scale.setScalar(h);g.updateMatrix();sarI.setMatrixAt(sarN,g.matrix);sarH.setMatrixAt(sarN,g.matrix.clone().multiply(hoodM));sarN++;}}
@@ -2762,7 +2762,7 @@ function trainMats(C){return {body:new T.MeshPhysicalMaterial({color:C.body,roug
   roof:new T.MeshStandardMaterial({color:C.roof,roughness:.75,metalness:.1}),black:new T.MeshStandardMaterial({color:0x0e0f10,roughness:.68,metalness:.3}),
   steel:new T.MeshStandardMaterial({color:0x8a8e94,roughness:.32,metalness:.9}),brass:new T.MeshStandardMaterial({color:0xc09a52,roughness:.28,metalness:.92}),
   red:new T.MeshStandardMaterial({color:0x7a2a22,roughness:.5,metalness:.2}),
-  pane:new T.MeshStandardMaterial({color:0x06080b,roughness:.18,metalness:.1,envMapIntensity:.35,emissive:C.win,emissiveIntensity:.12}),
+  pane:new T.MeshStandardMaterial({color:0x1e2c34,roughness:.18,metalness:.1,envMapIntensity:.35,emissive:C.win,emissiveIntensity:.12}),
   trim:new T.MeshStandardMaterial({color:new T.Color(C.body).lerp(new T.Color(0xd8c8a0),.55),roughness:.4,metalness:.5})};}
 function wheelGeo(r){return geoC('wh'+r,()=>{const rim=latheZ([[-.07,0],[-.07,r*.82],[-.09,r*.86],[-.09,r],[.07,r],[.07,r*.86],[.05,r*.82],[.05,0]],30),parts=[rim];
   const hub=latheZ([[-.12,0],[-.12,r*.2],[.1,r*.2],[.1,0]],16);parts.push(hub);for(let i=0;i<10;i++){const sp=new T.BoxGeometry(.05,r*.68,.06);sp.translate(0,r*.5,0);sp.rotateZ(i/10*PI*2);parts.push(sp);}
@@ -2900,7 +2900,7 @@ function stnRoom(S,st,x,z,y0,side,lamps,M){const g=new T.Group();g.position.set(
     facePlane(.95,2.1,fx*1.72,1.05,0,new T.MeshStandardMaterial({color:0x22303a,roughness:.8,side:T.DoubleSide}));wl(fx*1.9,2,0,2.4);}
   else if(st.room==='dome'){const sm_=new T.MeshStandardMaterial({color:0xd0a47a,roughness:1,map:ashlarTex('rgb(200,160,120)',[3,1]).map});add(new T.Mesh(new T.CylinderGeometry(2.4,2.5,2.8,20),sm_),0,1.4,0);
     const d=add(new T.Mesh(new T.SphereGeometry(2.4,20,10,0,PI*2,0,PI/2),sm_),0,2.8,0);add(new T.Mesh(new T.ConeGeometry(.12,.7,6),new T.MeshStandardMaterial({color:0xb08a3a,metalness:.6,roughness:.4})),0,5.4,0);
-    facePlane(1.0,1.9,fx*2.42,.95,0,new T.MeshStandardMaterial({color:0x2a1a12,side:T.DoubleSide}));add(new T.Mesh(new T.CylinderGeometry(.5,.5,.06,16,1,false,0,PI),new T.MeshStandardMaterial({color:0x2a1a12,side:T.DoubleSide})),fx*2.42,1.9,0).rotation.set(0,0,fx*PI/2);
+    facePlane(1.0,1.9,fx*2.42,.95,0,new T.MeshStandardMaterial({color:0x6a4a32,side:T.DoubleSide}));add(new T.Mesh(new T.CylinderGeometry(.5,.5,.06,16,1,false,0,PI),new T.MeshStandardMaterial({color:0x6a4a32,side:T.DoubleSide})),fx*2.42,1.9,0).rotation.set(0,0,fx*PI/2);
     const cl=cv(64,64),cx=cl.getContext('2d');for(let i=0;i<8;i++){cx.fillStyle=i%2?'#e8dcc4':'#b4462e';cx.fillRect(i*8,0,8,64);}const aw=add(new T.Mesh(new T.PlaneGeometry(2.4,1.4),new T.MeshStandardMaterial({map:tex(cl),side:T.DoubleSide,roughness:1})),fx*2.9,2.35,0);aw.rotation.set(0,fx*PI/2,0);aw.rotateX(-.6);wl(fx*2.6,1.6,0,2.2);}
   else if(st.room==='bell'){const br=new T.MeshStandardMaterial({color:0xa8884a,metalness:.7,roughness:.35});add(new T.Mesh(new T.CylinderGeometry(2.3,2.3,.4,24),br),0,.2,0);
     const gm=new T.MeshStandardMaterial({color:0xbfe8f0,transparent:true,opacity:.28,roughness:.1,metalness:.1,side:T.DoubleSide,depthWrite:false});add(new T.Mesh(new T.SphereGeometry(2.2,24,14,0,PI*2,0,PI/2),gm),0,.4,0).scale.y=1.4;
@@ -3412,6 +3412,7 @@ if(DEV.on){
 <h4>時刻</h4><div class="g">${['real',6,9,12,17,19,22,2].map(h=>`<button data-t="${h}">${h==='real'?'実時刻':h+'時'}</button>`).join('')}</div>
 <h4>出来事</h4><div class="g" id="devE"></div>
 <h4>汽車</h4><div class="g"><button data-a="plat">ホームへ</button><button data-a="skip">すぐ来る</button></div>
+<h4>見た目の点検</h4><div class="g"><button data-a="lint">真っ黒・色抜けの素材を探す</button></div><div id="devLint"></div>
 <h4>エラー</h4><div class="mono" id="devErr">なし</div><div class="g" style="margin-top:4px"><button data-a="clr">エラー表示を消す</button></div>`;
   document.body.appendChild(P);
   const $=id=>document.getElementById(id);let fps=0,fc=0,f0=performance.now(),lastBuild=0;
@@ -3432,10 +3433,15 @@ if(DEV.on){
   P.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.stopPropagation();const d=b.dataset;
     if(d.w)swap(d.w);else if(d.run)run(parseFloat(d.run));else if(d.t){todMode=String(d.t);paint();}
     else if(d.e){const f=(DEV.events||[])[+d.e];try{f&&f();}catch(err){DEV.errs.push(String(err));}}
-    else if(d.a==='stop'){running=-1;}else if(d.a==='clr'){DEV.errs.length=0;}else if(d.a==='min'){P.classList.toggle('min');b.textContent=P.classList.contains('min')?'ひらく':'たたむ';}
+    else if(d.a==='stop'){running=-1;}else if(d.a==='clr'){DEV.errs.length=0;}else if(d.a==='lint'){lint();}else if(d.a==='min'){P.classList.toggle('min');b.textContent=P.classList.contains('min')?'ひらく':'たたむ';}
     else if(d.a==='plat'){try{toPlatform();}catch(err){DEV.errs.push(String(err));}}else if(d.a==='skip'){try{railSkip();}catch(err){DEV.errs.push(String(err));}}});
   ['pointerdown','pointerup','wheel','dblclick'].forEach(t=>P.addEventListener(t,e=>e.stopPropagation()));
-  window.__dev={swap,run,errs:DEV.errs};setTimeout(paint,300);
+  /* 色の付け忘れ（頂点色が無いのに頂点色を使う）や、光らないのに真っ黒な素材を数える */
+  const lint=()=>{const out=new Map(),c=new T.Color();scene.traverse(o=>{if(!o.isMesh||!o.visible)return;(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(!m||!m.color)return;let why='';
+      if(m.vertexColors&&!o.geometry.attributes.color)why='頂点色が無い（黒く出る）';else{c.copy(m.color);const L=.2126*c.r+.7152*c.g+.0722*c.b,E=m.emissive?(m.emissive.r+m.emissive.g+m.emissive.b)*(m.emissiveIntensity||0):0;if(L<.012&&E<.05&&!m.map)why='ほぼ黒 #'+m.color.getHexString();}
+      if(why){const k=why+'|'+(o.geometry.type||'');const v=out.get(k)||{why,geo:o.geometry.type,n:0,ex:o};v.n++;out.set(k,v);}});});
+    const L=[...out.values()].sort((a,b)=>a.why<b.why?-1:1);$('devLint').innerHTML=L.length?L.map(v=>`<div class="${v.why.startsWith('頂点')?'ng':''}">${v.why}（${v.geo} ×${v.n}）</div>`).join(''):'見つかりませんでした';console.log('lint',L);};
+  window.__dev={swap,run,lint,errs:DEV.errs};setTimeout(paint,300);
 }
 })();
 </script>
