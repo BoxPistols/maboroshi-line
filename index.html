@@ -671,7 +671,7 @@ function ashlarTex(tone,rep){return qcache('as'+tone+(rep||[]).join(),()=>{const
   for(let r=0;r<rowsH.length-1;r++){const y0=rowsH[r],y1=rowsH[r+1];let xx=-(q()*40|0);while(xx<S){const w=34+(q()*40|0),k=.82+q()*.3;x.fillStyle='rgb('+(base[0]*k|0)+','+(base[1]*k|0)+','+(base[2]*k|0)+')';
     const draw=X=>{x.fillRect(X+1.5,y0+1.5,w-3,y1-y0-3);y.fillStyle='#b4b4b4';y.fillRect(X+1.5,y0+1.5,w-3,y1-y0-3);};draw(xx);if(xx+w>S)draw(xx-S);if(xx<0)draw(xx+S);xx+=w;}}
   const im=x.getImageData(0,0,S,S);for(let i=0;i<S*S;i++){const v=.8+.35*n[i];im.data[i*4]*=v;im.data[i*4+1]*=v;im.data[i*4+2]*=v;}x.putImageData(im,0,0);
-  for(let i=0;i<35;i++){const px=q()*S,py=q()*S,r=1+q()*3;x.fillStyle='rgba(20,16,12,'+(.2+q()*.3)+')';x.beginPath();x.arc(px,py,r,0,7);x.fill();y.fillStyle='rgba(0,0,0,.5)';y.beginPath();y.arc(px,py,r,0,7);y.fill();}
+  
   for(let i=0;i<30;i++){const px=q()*S,py=q()*S,r=8+q()*22,gg=x.createRadialGradient(px,py,0,px,py,r);gg.addColorStop(0,'rgba(70,90,50,'+(q()*.18)+')');gg.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gg;x.fillRect(px-r,py-r,r*2,r*2);}
   return {map:texQ(c,rep),bump:texQ(b,rep,true)};});}
 
@@ -748,7 +748,7 @@ function coralGeos(){return qcache('coralG',()=>{const q=rngOf(913),list=[];
     br(new T.Vector3(0,-.2,0),new T.Vector3(0,1,0),.16,.95,2,.72);const branch=mergeGeo(list);
     const brain=new T.SphereGeometry(1,24,16);const bp=brain.attributes.position,v=new T.Vector3();for(let i=0;i<bp.count;i++){v.fromBufferAttribute(bp,i);const k=1+.05*Math.sin(v.x*2.4+v.z*1.3)*Math.cos(v.z*2.1);v.multiplyScalar(k);v.y*=.7;bp.setXYZ(i,v.x,v.y,v.z);}brain.computeVertexNormals();
     const fan=new T.PlaneGeometry(2.2,2.2,1,1);fan.translate(0,1.1,0);return {branch,brain,fan};});}
-function polypTex(){return qcache('polyp',()=>{const S=256,c=cv(S,S),x=c.getContext('2d'),q=rngOf(778);x.fillStyle='#bdbdbd';x.fillRect(0,0,S,S);for(let i=0;i<900;i++){const px=q()*S,py=q()*S,r=1.2+q()*2.2;x.fillStyle='#ececec';x.beginPath();x.arc(px,py,r+1.1,0,PI*2);x.fill();x.fillStyle='#6a6a6a';x.beginPath();x.arc(px,py,r*.6,0,PI*2);x.fill();}const t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t;});}
+function polypTex(){return qcache('polyp',()=>{const S=256,c=cv(S,S),x=c.getContext('2d'),q=rngOf(778);x.fillStyle='#bdbdbd';x.fillRect(0,0,S,S);{const n=pnoise(S,S,4,3,778),im=x.getImageData(0,0,S,S);for(let i=0;i<S*S;i++){const v=170+70*n[i];im.data[i*4]=im.data[i*4+1]=im.data[i*4+2]=v;}x.putImageData(im,0,0);}const t=tex(c);t.wrapS=t.wrapT=T.RepeatWrapping;return t;});}
 function fanAlpha(){return qcache('fanA2',()=>{const S=256,c=cv(S,S),x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,S,S);x.fillStyle='#e8e8e8';x.beginPath();x.moveTo(128,250);for(let i=0;i<=40;i++){const a=PI*.12+i/40*PI*.76,r=232+Math.sin(i*.9)*8;x.lineTo(128+Math.cos(a)*r*.62,250-Math.sin(a)*r);}x.closePath();x.fill();
     x.strokeStyle='#b8b8b8';x.lineWidth=2;for(let i=0;i<13;i++){const a=PI*.14+i/12*PI*.72;x.beginPath();x.moveTo(128,248);x.quadraticCurveTo(128+Math.cos(a)*60,248-Math.sin(a)*110,128+Math.cos(a)*138,248-Math.sin(a)*222);x.stroke();}const t=tex(c);return t;});}
 /* 街の名前は世界ごとに決め打ち（乱数の順序が変わっても変わらない） */
@@ -1364,7 +1364,7 @@ function buildDesert(seed){
   obs.add(cast(new T.Mesh(new T.CylinderGeometry(7,8,9,24),stone)));const dome=cast(new T.Mesh(new T.SphereGeometry(7.2,24,12,0,PI*2,0,PI/2),new T.MeshStandardMaterial({color:0x6a7f8e,metalness:.5,roughness:.4})));dome.position.y=4.5;obs.add(dome);
   for(let i=0;i<6;i++){const a=i/6*PI*2,w=glow(0xffc070,3,.95);w.position.set(Math.cos(a)*7.4,1.5,Math.sin(a)*7.4);obs.add(w);}const beam=glow(0xbfe0ff,14,.6);beam.position.y=12;obs.add(beam);W.add(obs);
   /* 光る結晶 */
-  const crC=[0x7ff5e0,0xb69cff,0xff9ad5][R()*3|0],crM=new T.MeshStandardMaterial({color:crC,emissive:crC,emissiveIntensity:.6,roughness:.2,metalness:.1,transparent:true,opacity:.85}),crG=new T.ConeGeometry(.5,1,5);
+  const crC=[0x7ff5e0,0xb69cff,0xff9ad5][R()*3|0],crM=new T.MeshStandardMaterial({color:crC,emissive:crC,emissiveIntensity:.6,roughness:.2,metalness:.1,transparent:true,opacity:.85}),crG=latheY([[0,0],[.42,0],[.5,.06],[.5,.6],[.44,.78],[.3,.92],[.12,.99],[0,1]],6);
   const crystals=[];for(let i=0;i<16;i++){const x=rr(-60,60),z=rr(-80,10);if(Math.abs(x)<6&&z>-10)continue;const g=new T.Group();g.position.set(x,dh(x,z)-.3,z);
     for(let j=0;j<3+(R()*4|0);j++){const m=new T.Mesh(crG,crM);const h=rr(1.5,4.5);m.scale.set(h*.35,h,h*.35);m.position.set(rr(-.8,.8),h/2,rr(-.8,.8));m.rotation.set(rr(-.4,.4),0,rr(-.4,.4));g.add(m);}
     const gl=glow(crC,6,.35);gl.position.y=1.5;g.add(gl);crystals.push(gl);W.add(g);}
@@ -1414,6 +1414,21 @@ function buildDesert(seed){
   let glyphBoost=0;ups.push((t,dt)=>{if(glyphBoost>0){glyphBoost=Math.max(0,glyphBoost-dt*.25);glyphM.opacity=Math.min(1,glyphM.opacity+glyphBoost);beam.material.opacity+=glyphBoost*.5;}});
   sky.userData.sky=true;planet.userData.pick='moon';moon2.userData.pick='moon';obs.userData.pick='bell';ringGate.userData.pick='ring';
   W.children.forEach(o=>{if(o.userData.pick||o===ground)return;let st=false,cr=false;o.traverse(m=>{if(m.material===stone)st=true;if(m.material===crM)cr=true;});if(cr)o.userData.pick='crystal';else if(st)o.userData.pick='ruin';});
+  /* オアシス: 椰子と泉、丸い砂岩、遠くの台地 */
+  {const R=rngOf(seed*43+5),av=(x,z)=>(Math.abs(z-14)<12&&Math.abs(x)<50)||Math.hypot(x,z-40)<10;
+    const ox2=-36,oz2=-18;let py=1e9;for(let i=0;i<16;i++){const a=i/16*6.28;py=Math.min(py,dh(ox2+Math.cos(a)*9,oz2+Math.sin(a)*9));}
+    const pond=new T.Mesh(new T.CircleGeometry(9.5,40),new T.MeshStandardMaterial({color:0x3a8a8a,roughness:.1,metalness:.3,emissive:0x0a3a3a,emissiveIntensity:.3}));pond.rotation.x=-PI/2;pond.position.set(ox2,py+.25,oz2);pond.userData.pick='water';W.add(pond);
+    const palmG=geoC('palm',()=>{const curve=new T.CatmullRomCurve3([new T.Vector3(0,0,0),new T.Vector3(.3,2.5,0),new T.Vector3(.9,5,0),new T.Vector3(1.6,7,0)]),tr=new T.TubeGeometry(curve,14,.28,8),tc=[],A=new T.Color(0x8a6a48);for(let k=0;k<tr.attributes.position.count;k++)tc.push(A.r,A.g,A.b);tr.setAttribute('color',new T.Float32BufferAttribute(tc,3));
+      const parts=[tr];for(let i=0;i<8;i++){const g=new T.PlaneGeometry(.8,4.2,1,8),pa=g.attributes.position,col=[],L=new T.Color(0x3f7a3a),L2=new T.Color(0x86b060),C=new T.Color();for(let k=0;k<pa.count;k++){const y=pa.getY(k)+2.1,t=y/4.2;pa.setX(k,pa.getX(k)*Math.sin(Math.min(1,t*1.1)*PI));pa.setY(k,y);pa.setZ(k,-t*t*2.2);C.copy(L).lerp(L2,t);col.push(C.r,C.g,C.b);}
+        g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.rotateX(-PI/2+.5);g.rotateY(i/8*PI*2);g.translate(1.6,7,0);parts.push(g);}
+      const m=mergeGeometries(parts);m.computeVertexNormals();return m;});
+    const palmM=new T.MeshStandardMaterial({vertexColors:true,roughness:.8,side:T.DoubleSide}),palms=[];for(let i=0;i<9;i++){const a=i/9*6.28+R()*.4,d=rr(10.5,15),x=ox2+Math.cos(a)*d,z=oz2+Math.sin(a)*d;palms.push({x,y:dh(x,z)-.2,z,s:rr(.8,1.25),ry:R()*6});}
+    scatterIM(W,palmG,palmM,palms,{pick:'tree',cast:true});
+    const bM=new T.MeshStandardMaterial({vertexColors:true,roughness:.95});
+    for(let v=0;v<3;v++)scatterIM(W,boulderGeo(610+v,1,0xd8b088,0xa8805a),bM,ringPts(R,16,0,10,16,220,av).map(([x,z])=>({x,y:dh(x,z)+.2,z,s:rr(1.4,4),sy:rr(.5,.8),ry:R()*6})),{pick:'ruin'});
+    const mesaG=geoC('mesa',()=>latheY([[1,0],[.98,.3],[.9,.36],[.88,.7],[.78,.76],[.74,.96],[.6,1],[0,1]],28)),mesaM=new T.MeshStandardMaterial({color:0xb07a58,roughness:.95});
+    const mesas=[];for(let i=0;i<12;i++){const a=i/12*6.28+R()*.3,d=rr(150,290),x=Math.cos(a)*d,z=-20+Math.sin(a)*d;mesas.push({x,y:dh(x,z)-2,z,s:rr(14,26),sy:rr(.5,.9),ry:R()*6});}
+    scatterIM(W,mesaG,mesaM,mesas,{pick:'ruin'});}
   return {kind:'desert',fx:'sand',cam:[0,7,40],look:[0,22,-120],lookP:[planet.position.x*.25,26,-120],up:[0,150,-200],
     eye:(x,z)=>dh(x,z)+6.5,clamp:(x,z)=>{const dx=x,dz=z-10,d=Math.hypot(dx,dz),m=Math.min(1,330/d);return [dx*m,10+dz*m];},
     route:{pts:widen([[0,42],[40,34],[78,14],[96,-30],[70,-72],[20,-92],[-36,-80],[-80,-46],[-92,6],[-66,46],[-30,52]],0,10,2.3),
@@ -1600,7 +1615,7 @@ function winTex(R,o){o=o||{};const cols=o.cols||4,rows=o.rows||3,W_=256,H_=256,c
 function nightSky(W,R,rr,n,names,o){o=o||{};const S=makeSky(W,R,rr,n,{names,always:false,color:o.color,lineColor:o.lineColor});if(o.mirror){const a=S.pts.clone();a.scale.y=-1;S.skyRot.add(a);const b=S.ln.clone();b.scale.y=-1;S.skyRot.add(b);}return S;}
 function gableRoof(w,d,h,mat){const s=new T.Shape();s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(0,h);s.closePath();const g=new T.ExtrudeGeometry(s,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return new T.Mesh(g,mat);}
 function lampPost(W,x,y,z,col,list,h){const pole=new T.Mesh(new T.CylinderGeometry(.08,.12,h||3.4,6),new T.MeshStandardMaterial({color:0x151515}));pole.position.set(x,y+(h||3.4)/2,z);W.add(pole);const g=glow(col||0xffb060,4,.95);g.position.set(x,y+(h||3.4)+.1,z);W.add(g);if(list)list.push(g);return g;}
-function simpleMoon(W,pos,r,col,sunDir){const c=cv(512,256),x=c.getContext('2d');x.fillStyle=col||'#d8d2c4';x.fillRect(0,0,512,256);for(let i=0;i<160;i++){const px=Math.random()*512,py=Math.random()*256,rr=1+Math.pow(Math.random(),3)*14;x.beginPath();x.arc(px,py,rr,0,7);x.fillStyle='rgba(60,60,70,'+(.1+Math.random()*.2)+')';x.fill();}
+function simpleMoon(W,pos,r,col,sunDir){const c=cv(512,256),x=c.getContext('2d');x.fillStyle=col||'#d8d2c4';x.fillRect(0,0,512,256);{const q=rngOf(77);for(let i=0;i<8;i++){const px=q()*512,py=50+q()*156,rr=30+q()*50,g=x.createRadialGradient(px,py,0,px,py,rr);g.addColorStop(0,'rgba(90,90,100,.22)');g.addColorStop(1,'rgba(90,90,100,0)');x.fillStyle=g;x.fillRect(px-rr,py-rr,rr*2,rr*2);}}
   const m=new T.Mesh(new T.SphereGeometry(r,48,32),new T.ShaderMaterial({fog:false,uniforms:{map:{value:tex(c)},sun:{value:sunDir}},vertexShader:'varying vec3 vN;varying vec2 vUv;void main(){vN=normalize(mat3(modelMatrix)*normal);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
     fragmentShader:'varying vec3 vN;varying vec2 vUv;uniform sampler2D map;uniform vec3 sun;void main(){float l=smoothstep(-.1,.4,dot(normalize(vN),sun));vec3 c=texture2D(map,vUv).rgb;c=c*c*(.05+l*1.2);gl_FragColor=linearToOutputTexel(vec4(c,1.));}'}));m.position.copy(pos);m.userData.pick='moon';W.add(m);
   const h=glow(0xbfd0f0,r*5,.22);h.material.fog=false;h.position.copy(pos).multiplyScalar(1.03);W.add(h);return {m,h};}
@@ -1687,6 +1702,22 @@ function buildSnow(seed){
   tick=(t,dt,skyK)=>{const P=palette(tod),dk=P.day,nk=1-dk,sd=sunDirAt(tod);SK.update(P,sd);LT.update(P,sd);S.mat.uniforms.t.value=t;S.mat.uniforms.k.value=nk;S.lineMat.opacity=(.38*skyK+consBoost*.6)*nk;S.skyRot.rotation.y=t*.0022;shots.up(dt);
     snow.material.uniforms.t.value=t;aurMat.uniforms.t.value=t;aurMat.uniforms.a.value=nk*(.45+aurBoost*.8);MO.h.material.opacity=.22*nk;nightGlows.forEach(g=>{if(g.userData.b==null)g.userData.b=g.material.opacity;g.material.opacity=g.userData.b*(nk*.9+.1);});
     nightEm.forEach(m=>{if(m.userData.b==null)m.userData.b=m.emissiveIntensity;m.emissiveIntensity=m.userData.b*(nk*.85+.15);});ups.forEach(f=>f(t,dt));};
+  /* 雪原の小物: 灯りのともる小屋、雪の岩、柵、街灯、雪だるま */
+  {const R=rngOf(seed*37+11),av=(x,z)=>(Math.abs(z+30)<16&&Math.abs(x)<60)||Math.hypot(x,z-22)<9||inLake(x,z)||Math.hypot(x-lake.x,z-lake.z)<lake.r+6;
+    const logM=new T.MeshStandardMaterial({color:0x8a6446,roughness:.9}),roofM=new T.MeshStandardMaterial({color:0xf2f4f8,roughness:.8}),winM=new T.MeshStandardMaterial({color:0xffd9a0,emissive:0xffb060,emissiveIntensity:1.1});
+    ringPts(R,7,0,-20,45,150,av).forEach(([x,z])=>{const g=new T.Group(),y=gh(x,z);g.position.set(x,y,z);g.rotation.y=R()*6.28;const b=new T.Mesh(geoC('cab',()=>rbox(6,3.2,4.6,.25)),logM);b.position.y=1.6;g.add(b);
+      [-1,1].forEach(sg=>{const r=new T.Mesh(geoC('cabr',()=>rbox(7,.5,3.6,.2)),roofM);r.position.set(0,3.9,sg*1.25);r.rotation.x=sg*.62;g.add(r);});
+      const ch=new T.Mesh(geoC('cabc',()=>rbox(.7,1.6,.7,.08)),new T.MeshStandardMaterial({color:0x8a7a6a,roughness:.9}));ch.position.set(1.8,4.6,-.6);g.add(ch);
+      [-1.4,1.4].forEach(wx=>{const w=new T.Mesh(geoC('cabw',()=>new T.PlaneGeometry(.9,1)),winM);w.position.set(wx,1.8,2.31);g.add(w);});g.userData.pick='house';W.add(g);});
+    const bM=new T.MeshStandardMaterial({vertexColors:true,roughness:.9});
+    for(let v=0;v<2;v++)scatterIM(W,boulderGeo(520+v,1,0xf4f6fa,0x7a7a80),bM,ringPts(R,14,0,-20,16,200,av).map(([x,z])=>({x,y:gh(x,z)+.1,z,s:rr(1,3),sy:rr(.5,.8),ry:R()*6})),{pick:'rock'});
+    const fM=new T.MeshStandardMaterial({color:0x7a5a40,roughness:.9}),fp=[],fr=[];
+    for(let l=0;l<5;l++){const a=R()*6.28,d=rr(30,110),x0=Math.cos(a)*d,z0=Math.sin(a)*d-20,dir=R()*6.28,n=6+(R()*6|0);for(let i=0;i<n;i++){const x=x0+Math.cos(dir)*i*3,z=z0+Math.sin(dir)*i*3;if(av(x,z))continue;const y=gh(x,z);fp.push({x,y:y+.7,z});if(i<n-1)[.5,1.05].forEach(h=>fr.push({x:x+Math.cos(dir)*1.5,y:y+h,z:z+Math.sin(dir)*1.5,ry:-dir}));}}
+    scatterIM(W,geoC('fpost',()=>new T.CylinderGeometry(.08,.1,1.4,6)),fM,fp);scatterIM(W,geoC('frail',()=>new T.BoxGeometry(3,.09,.06)),fM,fr);
+    for(let i=0;i<5;i++){const x=-24+i*12,z=-21.5;lampPost(W,x,gh(x,z),z,0xffc070,null,3.2);}
+    const sw=new T.MeshStandardMaterial({color:0xf6f8fc,roughness:.8}),scarf=new T.MeshStandardMaterial({color:0xb04a3a,roughness:.8}),nose=new T.MeshStandardMaterial({color:0xe08a3a,roughness:.6});
+    [[18,-4],[-26,-6],[34,-58]].forEach(([x,z])=>{const g=new T.Group();g.position.set(x,gh(x,z),z);g.rotation.y=R()*1-.5;[[1,1],[.72,2.4],[.5,3.4]].forEach(([r,y])=>{const b=new T.Mesh(geoC('snb'+r,()=>new T.SphereGeometry(r,20,14)),sw);b.position.y=y;g.add(b);});
+      const sc=new T.Mesh(new T.TorusGeometry(.5,.12,8,20),scarf);sc.rotation.x=PI/2;sc.position.y=3.0;g.add(sc);const n=new T.Mesh(new T.ConeGeometry(.08,.5,10),nose);n.rotation.x=PI/2;n.position.set(0,3.42,.6);g.add(n);W.add(g);});}
   return {kind:'snow',fx:'snow',cam:[0,4.4,22],look:[0,6,-40],lookP:[-6,8,-40],up:[0,150,-160],
     eye:(x,z)=>gh(x,z)+4.2+(Math.abs(z+23.5)<3&&Math.abs(x)<40?1.1:0),clamp:(x,z)=>{const d=Math.hypot(x,z),m=Math.min(1,260/d);return [x*m,z*m];},
     route:{pts:widen([[0,22],[36,20],[72,10],[96,-20],[80,-56],[40,-70],[60,-36],[70,-8],[30,2],[-30,8],[-70,20],[-96,44],[-60,66],[-20,50]],0,0,2.2),stops:[{i:4,look:[-26,8,-12]},{i:3,look:[train.position.x,3,-30]},{i:2,look:[tpx,12,tpz]},{i:6,look:[lake.x,0,lake.z]}]},
@@ -1760,6 +1791,17 @@ function buildSky(seed){
     fallM.uniforms.t.value=t;lan.material.uniforms.t.value=t;lan.material.uniforms.k.value=.35+nk*.65;MO.h.material.opacity=.22*nk;nightGlows.forEach(g=>{if(g.userData.b==null)g.userData.b=g.material.opacity;g.material.opacity=g.userData.b*(nk*.9+.1);});
     nightEm.forEach(m=>{if(m.userData.b==null)m.userData.b=m.emissiveIntensity;m.emissiveIntensity=m.userData.b*(nk*.85+.15);});ups.forEach(f=>f(t,dt));};
   const topH=(x,z)=>{const d=Math.hypot(x,z)/34;return (1-d*d)*1.2+Math.sin(x*.3)*Math.cos(z*.25)*.4*(1-d);};
+  /* 気球と、小さな浮島 */
+  {const R=rngOf(seed*47+9),cols=[[0xe8a07a,0xf4e2c8],[0x8ab0c8,0xf0ead8],[0xc89aa8,0xf2e6d6],[0xa8c088,0xf0ead8]],balloons=[];
+    for(let i=0;i<4;i++){const g=new T.Group(),[c1,c2]=cols[i],env=new T.Mesh(geoC('blnG',()=>latheY([[0,-3.2],[.9,-3],[2.2,-1.8],[3,0],[3.1,1.4],[2.6,2.8],[1.4,3.7],[0,4]],24)),new T.MeshStandardMaterial({color:c1,roughness:.7}));
+      const band=new T.Mesh(geoC('blnB',()=>new T.TorusGeometry(3.05,.22,8,32)),new T.MeshStandardMaterial({color:c2,roughness:.7}));band.rotation.x=PI/2;band.position.y=.6;
+      const bk=new T.Mesh(geoC('blnK',()=>rbox(1.2,.9,1.2,.12)),new T.MeshStandardMaterial({color:0x8a6a48,roughness:.9}));bk.position.y=-5;
+      const rope=new T.Mesh(geoC('blnR',()=>new T.CylinderGeometry(.03,.03,1.9,4)),new T.MeshStandardMaterial({color:0x6a5a48}));rope.position.y=-4;g.add(env,band,bk,rope);
+      const a=i/4*6.28+R(),d=rr(70,160);g.position.set(Math.cos(a)*d,rr(10,40),Math.sin(a)*d);g.userData.pick='lantern';W.add(g);balloons.push({g,a,d,y:g.position.y,sp:rr(.008,.016)*(R()<.5?1:-1),ph:R()*6});}
+    ups.push((t)=>{balloons.forEach(b=>{const a=b.a+t*b.sp;b.g.position.set(Math.cos(a)*b.d,b.y+Math.sin(t*.2+b.ph)*2,Math.sin(a)*b.d);});});
+    const isM=new T.MeshStandardMaterial({vertexColors:true,roughness:.95}),under=new T.MeshStandardMaterial({color:0xa8a29a,roughness:.95}),tM=new T.MeshStandardMaterial({vertexColors:true,color:0xd0e0c8,roughness:.9}),tops=[],cones=[],trs=[];
+    for(let i=0;i<9;i++){const a=i/9*6.28+R()*.5,d=rr(90,230),x=Math.cos(a)*d,z=Math.sin(a)*d,y=rr(-25,25),r=rr(4,9);tops.push({x,y,z,s:r,sy:.3});cones.push({x,y:y-.2,z,s:r,sy:r*.18});for(let j=0;j<1+(R()*3|0);j++)trs.push({x:x+rr(-r*.4,r*.4),y:y+r*.22,z:z+rr(-r*.4,r*.4),s:rr(4,7),ry:R()*6});}
+    scatterIM(W,boulderGeo(710,1,0x88b070,0x9a9488),isM,tops,{pick:'island'});scatterIM(W,geoC('isCone',()=>{const g=latheY([[0,-1],[.4,-.7],[.8,-.25],[1,0]],16);return g;}),under,cones.map(c=>({...c,sy:.9})),{pick:'island'});scatterIM(W,roundTreeGeo(),tM,trs,{pick:'tree'});}
   return {kind:'sky',fx:'petals',cam:[0,5.5,24],look:[0,4,-80],lookP:[-8,6,-80],up:[0,140,-160],
     groundAt:(x,z)=>Math.hypot(x,z)<33?topH(x,z):null,eye:(x,z)=>topH(x,z)+4.4,clamp:(x,z)=>{const d=Math.hypot(x,z),m=Math.min(1,28/d);return [x*m,z*m];},
     route:{pts:[[0,24],[18,16],[25,-2],[14,-22],[-4,-26],[-24,-6],[-26,10],[-14,22]],stops:[{i:2,look:[200,20,0],dur:6},{i:4,look:[-14,14,-16]},{i:5,look:[-300,-60,-100]},{i:0,look:[0,-60,300],dur:6}]},
@@ -1832,6 +1874,17 @@ function buildForest(seed){
   tick=(t,dt,skyK)=>{const P=palette(tod),dk=P.day,nk=1-dk,sd=sunDirAt(tod);SK.update(P,sd);scene.fog.color.multiplyScalar(.55);LT.update(P,sd);S.mat.uniforms.t.value=t;S.mat.uniforms.k.value=nk;S.lineMat.opacity=(.38*skyK+consBoost*.6)*nk;
     ff.material.uniforms.t.value=t;ff.material.uniforms.k.value=.25+nk*.75+ffBoost*.5;rayM.uniforms.t.value=t;rayM.uniforms.lk.value=dk;pl.intensity=1.2*nk;
     nightGlows.forEach(g=>{if(g.userData.b==null)g.userData.b=g.material.opacity;g.material.opacity=g.userData.b*(nk*.8+.2);});ups.forEach(f=>f(t,dt));};
+  /* 森の中層: 丸い木と針葉樹、苔の岩、羊歯、倒木 */
+  {const R=rngOf(seed*31+7),av=(x,z)=>(Math.abs(z+4)<9&&Math.abs(x)<44)||Math.hypot(x,z-22)<9;
+    const tM=new T.MeshStandardMaterial({vertexColors:true,color:0x9ac2b2,roughness:.9}),cM=new T.MeshStandardMaterial({vertexColors:true,color:0x8ab0a4,roughness:.9});
+    scatterIM(W,roundTreeGeo(),tM,ringPts(R,46,0,-20,28,175,av).map(([x,z])=>({x,y:fh(x,z)-.2,z,s:rr(5,9),ry:R()*6})),{pick:'tree',cast:true});
+    scatterIM(W,coniferGeo(0),cM,ringPts(R,40,0,-20,30,180,av).map(([x,z])=>({x,y:fh(x,z)-.2,z,s:rr(7,13),sx:.8,sz:.8,ry:R()*6})),{pick:'tree',cast:true});
+    const bM=new T.MeshStandardMaterial({vertexColors:true,roughness:.95});
+    for(let v=0;v<3;v++)scatterIM(W,boulderGeo(310+v,1,0x5f8a52,0x6a6a62),bM,ringPts(R,10,0,-20,14,150,av).map(([x,z])=>({x,y:fh(x,z)+.1,z,s:rr(1.2,3.2),sy:rr(.6,.9),ry:R()*6})),{pick:'rock'});
+    const fM=new T.MeshStandardMaterial({vertexColors:true,roughness:.8,side:T.DoubleSide});
+    scatterIM(W,fernGeo(),fM,ringPts(R,150,0,-20,9,160,av).map(([x,z])=>({x,y:fh(x,z),z,s:rr(.9,1.8),ry:R()*6})));
+    const logM=new T.MeshStandardMaterial({vertexColors:true,roughness:.95}),logG=geoC('flog',()=>{const g=new T.CylinderGeometry(.55,.65,7,16,6);const pa=g.attributes.position,col=[],A=new T.Color(0x5a4636),B=new T.Color(0x5f8a4e),C=new T.Color();for(let k=0;k<pa.count;k++){const x=pa.getX(k),z=pa.getZ(k),up=Math.max(0,z/.6);C.copy(A).lerp(B,Math.min(1,up*1.3));col.push(C.r,C.g,C.b);}g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.rotateX(PI/2);g.rotateY(PI/2);return g;});
+    scatterIM(W,logG,logM,ringPts(R,9,0,-20,18,120,av).map(([x,z])=>({x,y:fh(x,z)+.35,z,s:rr(.8,1.3),ry:R()*6})),{pick:'tree'});}
   return {kind:'forest',fx:'fireflies',cam:[0,4.2,22],look:[0,6,-40],lookP:[0,7,-40],up:[0,140,-30],
     eye:(x,z)=>fh(x,z)+4.2,clamp:(x,z)=>{const dz=z+20,d=Math.hypot(x,dz),m=Math.min(1,190/d);return [x*m,-20+dz*m];},
     route:{pts:pathPts.concat(widen([[-8,30],[26,38],[56,20],[66,-20],[50,-60],[10,-84],[-40,-76],[-66,-40],[-60,4],[-34,26]],0,-20,2.2).slice(1)),stops:[{i:2,look:[40,1,-12]},{i:4,look:[0,60,-20],dur:6},{i:6,look:[snail.position.x,3,snail.position.z]},{i:0,look:[0,2,-20]}]},
@@ -1894,6 +1947,23 @@ function buildMirror(seed){
   scene.add(W);world=W;
   tick=(t,dt,skyK)=>{const P=palette(tod),dk=P.day,nk=1-dk,sd=sunDirAt(tod);SK.update(P,sd);LT.update(P,sd);S.mat.uniforms.t.value=t;S.mat.uniforms.k.value=nk*.9+.1;S.lineMat.opacity=(.38*skyK+consBoost*.6)*(nk*.9+.1);S.skyRot.rotation.y=t*.002;shots.up(dt);
     mirM.uniforms.t.value=t;mirM.uniforms.tint.value.copy(SK.mat.uniforms.hor.value).lerp(new T.Color(1,1,1),.5+dk*.3);MO1.h.material.opacity=.25*(nk*.8+.2);nightGlows.forEach(g=>{g.material.opacity=nk*.9+.1;});tramM.emissiveIntensity=1.3*(nk*.8+.2);ups.forEach(f=>f(t,dt));};
+  /* 塩原の小物: 木道と灯り、塩の丘、小島の木、遠くの東屋 */
+  {const R=rngOf(seed*29+3);
+    const path=new T.CatmullRomCurve3([[3,0,-16],[11,0,-40],[7,0,-72],[-10,0,-104],[-32,0,-134],[-54,0,-156]].map(p=>new T.Vector3(...p))),L=path.getLength(),wood=new T.MeshStandardMaterial({color:0x7a5a42,roughness:.85}),planks=[],posts=[];
+    for(let d=0;d<L;d+=.95){const t=d/L,p=path.getPointAt(t),tg=path.getTangentAt(t),ry=Math.atan2(tg.x,tg.z);planks.push({x:p.x,y:.32,z:p.z,ry:ry+PI/2});}
+    for(let d=0;d<L;d+=6){const t=d/L,p=path.getPointAt(t),tg=path.getTangentAt(t),nx=tg.z,nz=-tg.x;[-1,1].forEach(sg=>posts.push({x:p.x+nx*1.6*sg,y:.6,z:p.z+nz*1.6*sg}));}
+    scatterIM(W,geoC('plank',()=>rbox(3.4,.12,.8,.04)),wood,planks);scatterIM(W,geoC('bpost',()=>new T.CylinderGeometry(.09,.11,1.2,8)),wood,posts);
+    for(let d=12;d<L;d+=18){const t=d/L,p=path.getPointAt(t),tg=path.getTangentAt(t);lampPost(W,p.x+tg.z*1.7,0,p.z-tg.x*1.7,0xffc890,null,2.6);}
+    const saltG=geoC('salt',()=>latheY([[0,1],[.35,.96],[.7,.75],[.92,.35],[1,.04],[1.02,0]],20)),saltM=new T.MeshStandardMaterial({color:0xf2eee6,roughness:.7});
+    const mounds=[];for(let c=0;c<15;c++){const a=R()*6.28,d=rr(28,260),cx=Math.cos(a)*d,cz=Math.sin(a)*d;if(Math.abs(cx)<30&&cz>-170&&cz<20)continue;for(let k=0;k<4+(R()*4|0);k++){const x=cx+rr(-12,12),z=cz+rr(-12,12),r=rr(1.5,5);mounds.push({x,y:0,z,s:r,sy:rr(.35,.6)});}}
+    scatterIM(W,saltG,saltM,mounds,{pick:'rock'});
+    const isM=new T.MeshStandardMaterial({vertexColors:true,roughness:.95}),tM=new T.MeshStandardMaterial({vertexColors:true,color:0xc8d8c8,roughness:.9}),isl=[],trs=[];
+    for(let k=0;k<10;k++){const a=k/10*6.28+R()*.5,d=rr(70,280),x=Math.cos(a)*d,z=Math.sin(a)*d;if(z>-20&&Math.abs(x)<60)continue;const r=rr(5,10);isl.push({x,y:0,z,s:r,sy:.35});for(let j=0;j<1+(R()*2|0);j++)trs.push({x:x+rr(-r*.4,r*.4),y:r*.25,z:z+rr(-r*.4,r*.4),s:rr(7,11),ry:R()*6});}
+    scatterIM(W,boulderGeo(420,1,0xa8b090,0xd8d0c0),isM,isl,{pick:'rock'});scatterIM(W,roundTreeGeo(),tM,trs,{pick:'tree'});
+    const gz=new T.Group(),cream=new T.MeshStandardMaterial({color:0xf0e8da,roughness:.6});gz.position.set(-60,0,-160);
+    for(let i=0;i<8;i++){const a=i/8*6.28,c=new T.Mesh(geoC('gzc',()=>latheY([[.3,0],[.3,.2],[.2,.3],[.18,4.6],[.28,4.8],[.28,5]],10)),cream);c.position.set(Math.cos(a)*4,0,Math.sin(a)*4);gz.add(c);}
+    const dome=new T.Mesh(new T.SphereGeometry(4.6,24,12,0,PI*2,0,PI/2),cream);dome.position.y=5;dome.scale.y=.6;gz.add(dome);const base=new T.Mesh(new T.CylinderGeometry(5,5.3,.4,32),cream);base.position.y=.2;gz.add(base);
+    const fin=new T.Mesh(new T.SphereGeometry(.35,12,8),new T.MeshStandardMaterial({color:0xc8a050,metalness:.6,roughness:.4}));fin.position.y=7.9;gz.add(fin);gz.userData.pick='tower';W.add(gz);}
   return {kind:'mirror',fx:'aura',cam:[0,3.6,20],look:[0,5,-80],lookP:[-6,8,-80],up:[0,150,-200],
     eye:()=>3.6,clamp:(x,z)=>{const d=Math.hypot(x,z),m=Math.min(1,340/d);return [x*m,z*m];},
     route:{pts:widen([[0,20],[40,8],[80,-20],[100,-70],[70,-110],[20,-120],[-30,-100],[-70,-60],[-100,-10],[-90,50],[-50,80],[-10,60]],0,0,2.3),stops:[{i:2,look:[wt.position.x,6,wt.position.z]},{i:4,look:[-26,8,-180]},{i:5,look:[-260,110,-1000],dur:8},{i:0,look:[0,2,300],dur:6}]},
@@ -2750,6 +2820,18 @@ function coniferGeo(snow){return geoC('conif'+(snow?1:0),()=>{const pts=[[0,0],[
 function roundTreeGeo(){return geoC('rtree',()=>{const crown=latheY(Array.from({length:14},(_,i)=>{const t=i/13;return [Math.pow(Math.sin(t*PI),.75)*.5*(1-.12*t),.3+t*.7];}),16),trunk=latheY([[0,0],[.07,0],[.05,.05],[.04,.32],[0,.33]],8);
   const tint=(g,col)=>{const c=new Float32Array(g.attributes.position.count*3),C=new T.Color(col);for(let i=0;i<g.attributes.position.count;i++){c[i*3]=C.r;c[i*3+1]=C.g;c[i*3+2]=C.b;}g.setAttribute('color',new T.BufferAttribute(c,3));return g;};
   return mergeGeometries([tint(crown,0x2c5a38),tint(trunk,0x4a3a2c)]);});}
+/* 景色を埋める小物: 丸い岩、羊歯、点の散らし方 */
+function boulderGeo(seed,r,top,bot){return geoC('bld'+seed+'_'+r+'_'+top+'_'+bot,()=>{const q=rngOf(seed),g=new T.SphereGeometry(r,22,14),pa=g.attributes.position,ph=[q()*6,q()*6,q()*6],v=new T.Vector3(),n=new T.Vector3(),col=[],A=new T.Color(bot),B=new T.Color(top),C=new T.Color();
+  for(let k=0;k<pa.count;k++){v.fromBufferAttribute(pa,k);n.copy(v).normalize();v.multiplyScalar(1+.16*Math.sin(n.x*2.2+ph[0])*Math.cos(n.z*2.4+ph[1])+.07*Math.sin(n.y*3.7+ph[2]));if(v.y<-r*.2)v.y=-r*.2+(v.y+r*.2)*.2;pa.setXYZ(k,v.x,v.y,v.z);C.copy(A).lerp(B,Math.max(0,Math.min(1,(n.y-.15)/.5)));col.push(C.r,C.g,C.b);}
+  g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.computeVertexNormals();return g;});}
+function fernGeo(){return geoC('fern',()=>{const parts=[],N=7;for(let i=0;i<N;i++){const g=new T.PlaneGeometry(.34,1.6,1,8),pa=g.attributes.position,col=[],A=new T.Color(0x2c5a34),B=new T.Color(0x7aa860),C=new T.Color();
+    for(let k=0;k<pa.count;k++){const y=pa.getY(k)+.8,t=y/1.6;pa.setX(k,pa.getX(k)*Math.sin(Math.min(1,t*1.15)*PI)*1.1);pa.setY(k,y*(1-.25*t));pa.setZ(k,t*t*1.0);C.copy(A).lerp(B,t);col.push(C.r,C.g,C.b);}
+    g.setAttribute('color',new T.Float32BufferAttribute(col,3));g.rotateX(-.35-(i%2)*.25);g.rotateY(i/N*PI*2+(i%3)*.2);parts.push(g);}
+  const m=mergeGeometries(parts);m.computeVertexNormals();return m;});}
+function scatterIM(W,geo,mat,pts,opt){const im=new T.InstancedMesh(geo,mat,Math.max(1,pts.length)),o=new T.Object3D();im.count=pts.length;
+  pts.forEach((p,i)=>{o.position.set(p.x,p.y,p.z);o.rotation.set(p.rx||0,p.ry||0,p.rz||0);const sc=p.s||1;o.scale.set(sc*(p.sx||1),sc*(p.sy||1),sc*(p.sz||1));o.updateMatrix();im.setMatrixAt(i,o.matrix);});
+  im.frustumCulled=false;im.castShadow=!!(opt&&opt.cast);im.receiveShadow=true;if(opt&&opt.pick)im.userData.pick=opt.pick;W.add(im);return im;}
+function ringPts(R,n,cx,cz,r0,r1,avoid){const P=[];let g=0;while(P.length<n&&g++<n*30){const a=R()*6.2832,d=r0+(r1-r0)*Math.sqrt(R()),x=cx+Math.cos(a)*d,z=cz+Math.sin(a)*d;if(avoid&&avoid(x,z))continue;if(P.some(p=>Math.hypot(p[0]-x,p[1]-z)<1.2))continue;P.push([x,z]);}return P;}
 function latheZ(prof,seg){const g=new T.LatheGeometry(prof.map(([z,r])=>new T.Vector2(Math.max(0,r),z)),seg||28);g.rotateX(PI/2);return g;}
 function extrudeZ(pts,len,bev,holes){const sh=new T.Shape(pts.map(([x,y])=>new T.Vector2(x,y)));(holes||[]).forEach(h=>{const p=new T.Path(h.map(([x,y])=>new T.Vector2(x,y)));sh.holes.push(p);});
   const g=new T.ExtrudeGeometry(sh,{depth:len,bevelEnabled:!!bev,bevelSize:bev||0,bevelThickness:bev||0,bevelSegments:2,curveSegments:14});g.translate(0,0,-len/2);return g;}
