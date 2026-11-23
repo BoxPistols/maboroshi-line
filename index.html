@@ -546,7 +546,7 @@ THREE.ColorManagement.enabled=false;
  ['lights_physical_pars_fragment','lights_lambert_pars_fragment','lights_phong_pars_fragment'].forEach(k=>{SC[k]=SC[k].replace('vec3 irradiance = dotNL * directLight.color;','vec3 irradiance = dotNL * directLight.color * PI;');});
  SC.lights_toon_pars_fragment=SC.lights_toon_pars_fragment.replace('vec3 irradiance = getGradientIrradiance( geometryNormal, directLight.direction ) * directLight.color;','vec3 irradiance = getGradientIrradiance( geometryNormal, directLight.direction ) * directLight.color * PI;');}
 (function(){
-const DEV={on:/[?&]dev(=|&|$)/.test(location.search),events:null,errs:[]};const GC={};const geoC=(k,f)=>GC[k]||(GC[k]=f());
+const consLines=[];const DEV={on:/[?&]dev(=|&|$)/.test(location.search),events:null,errs:[]};const GC={};const geoC=(k,f)=>GC[k]||(GC[k]=f());
 'use strict';
 const T=THREE, PI=Math.PI;
 function rngOf(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -843,7 +843,7 @@ function buildHarbor(seed){
     vertexShader:'attribute float size;attribute float ph;attribute vec3 col;uniform float t,pr,k;varying vec3 vC;void main(){float tw=.72+.28*sin(t*(1.2+fract(ph)*2.6)+ph*6.28);vC=col*tw*k*smoothstep(.02,.16,normalize(position).y);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);gl_PointSize=size*pr;}',
     fragmentShader:'varying vec3 vC;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,0.,d);gl_FragColor=vec4(vC*a*a*1.5,1.);}'});
   const stars=new T.Points(sg,starMat);stars.renderOrder=-1;stars.frustumCulled=false;skyRot.add(stars);
-  const lineMat=new T.LineBasicMaterial({color:0x6f86c8,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false,fog:false});
+  const lineMat=new T.LineBasicMaterial({color:0x8fa6e0,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false,fog:false});consLines.push({m:lineMat,always:false});
   const haloM=new T.SpriteMaterial({map:glowTex,color:0x9fb6ff,blending:T.AdditiveBlending,depthWrite:false,transparent:true,opacity:.3,fog:false});
   haloPts.forEach(p=>{const h=new T.Sprite(haloM);h.scale.set(26,26,1);h.position.copy(p);skyRot.add(h);});
   const cl=new T.LineSegments(new T.BufferGeometry().setFromPoints(linePts),lineMat);cl.frustumCulled=false;skyRot.add(cl);
@@ -852,8 +852,8 @@ function buildHarbor(seed){
   /* 月 */
   const mc=cv(1024,512),mx=mc.getContext('2d');mx.fillStyle='#cfc9ba';mx.fillRect(0,0,1024,512);
   for(let i=0;i<26;i++){const x=R()*1024,y=80+R()*352,r=30+R()*110;const g=mx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(92,96,108,.55)');g.addColorStop(1,'rgba(92,96,108,0)');mx.fillStyle=g;mx.fillRect(x-r,y-r,r*2,r*2);}
-  for(let i=0;i<420;i++){const x=R()*1024,y=R()*512,r=1+Math.pow(R(),3)*16;mx.beginPath();mx.arc(x,y,r,0,7);mx.fillStyle='rgba(70,70,78,'+(.15+R()*.25)+')';mx.fill();mx.beginPath();mx.arc(x+r*.15,y+r*.15,r,0,7);mx.lineWidth=Math.max(1,r*.18);mx.strokeStyle='rgba(240,236,224,.35)';mx.stroke();}
-  const litFrag='varying vec3 vN;varying vec2 vUv;uniform sampler2D map;uniform vec3 sun,tint;uniform float dk;void main(){float l=smoothstep(-.08,.35,dot(normalize(vN),sun));vec3 c=texture2D(map,vUv).rgb;c=c*c*tint*(.035+l);c=mix(c,c*.45+vec3(.3,.4,.65)*.5,dk*.7);gl_FragColor=linearToOutputTexel(vec4(c,1.));}';
+  for(let i=0;i<420;i++){R();R();R();R();R();}
+  const litFrag='varying vec3 vN;varying vec2 vUv;uniform sampler2D map;uniform vec3 sun,tint;uniform float dk;void main(){float l=smoothstep(-.55,.7,dot(normalize(vN),sun));vec3 c=texture2D(map,vUv).rgb;c=c*c*tint*(.32+.68*l);c=mix(c,c*.45+vec3(.3,.4,.65)*.5,dk*.7);gl_FragColor=linearToOutputTexel(vec4(c,1.));}';
   const litVert='varying vec3 vN;varying vec2 vUv;void main(){vN=normalize(mat3(modelMatrix)*normal);vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}';
   const moonR=54;
   const moon=new T.Mesh(new T.SphereGeometry(moonR,64,48),new T.ShaderMaterial({fog:false,uniforms:{map:{value:tex(mc)},sun:{value:sunDir},tint:{value:new T.Color(1.25,1.2,1.05)},dk:{value:0}},vertexShader:litVert,fragmentShader:litFrag}));
@@ -1303,7 +1303,7 @@ function makeSky(W,R,rr,n,o){o=o||{};const RAD=o.radius||1500,me=o.minEl||.05;
     for(let j=0;j<ps.length-1;j++)linePts.push(ps[j],ps[j+1]);
     ps.forEach(p=>{const s=glow(o.glowColor||0xcfe0ff,24*RAD/1500,.35);s.material.fog=false;s.position.copy(p);skyRot.add(s);});
     cons.push({name:names.splice(R()*names.length|0,1)[0]+'座',pos:to3([qs.reduce((a,b)=>a+b[0],0)/qs.length,Math.min.apply(null,qs.map(b=>b[1]))-.06])});}
-  const lineMat=new T.LineBasicMaterial({color:o.lineColor||0x8fa2d8,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false,fog:false});
+  const lineMat=new T.LineBasicMaterial({color:o.lineColor||0x8fa2d8,transparent:true,opacity:0,blending:T.AdditiveBlending,depthWrite:false,fog:false});consLines.push({m:lineMat,always:o.always!==false});
   const ln=new T.LineSegments(new T.BufferGeometry().setFromPoints(linePts),lineMat);ln.frustumCulled=false;skyRot.add(ln);
   labelBox.textContent='';labels=cons.map(c=>{const d=document.createElement('div');d.className='star-name';d.textContent=c.name;labelBox.appendChild(d);return {el:d,pos:c.pos,grp:skyRot,always:o.always!==false,lm:lineMat};});
   return {mat,lineMat,skyRot,pts,ln};
@@ -2571,7 +2571,7 @@ let compiling=0,compileAt=0;let compileTok=0;function precompile(){if(!renderer.
   /* three の compileAsync は、待っている間にワールドを切り替えると捨てた素材を調べて止まるので、自前で安全に待つ */
   const props=renderer.properties,chk=()=>{if(tok!==compileTok)return;try{for(const m of mats){const pr=props.get(m),pg=pr&&pr.currentProgram;if(!pg||typeof pg.isReady!=='function'||pg.isReady())mats.delete(m);}}catch(err){mats.clear();}
     if(!mats.size||performance.now()-compileAt>4000){compiling=0;return;}setTimeout(chk,16);};setTimeout(chk,0);}
-function swapTown(n,k){envDirty=1;yaw=pitch=vYaw=vPitch=0;curKind=k||'harbor';seed=FIXED_SEED[curKind]||n;clearWorld();clearFx();clearFx3d();info=build(curKind,seed);addGate();walkerReset();collectPickables();musicSeed=seed;skyText();try{history.replaceState(null,'','#'+curKey());}catch(e){}switchSound();mediaMeta();refreshSaveBtn();recordHistory();if(!shelf.hidden)renderCards();precompile();}
+function swapTown(n,k){envDirty=1;yaw=pitch=vYaw=vPitch=0;curKind=k||'harbor';seed=FIXED_SEED[curKind]||n;clearWorld();clearFx();clearFx3d();consLines.length=0;info=build(curKind,seed);addGate();walkerReset();collectPickables();musicSeed=seed;skyText();try{history.replaceState(null,'','#'+curKey());}catch(e){}switchSound();mediaMeta();refreshSaveBtn();recordHistory();if(!shelf.hidden)renderCards();precompile();}
 async function recordHistory(){return;const sd=seed,kd=curKind;const same=()=>sd===seed&&kd===curKind;await new Promise(r=>setTimeout(r,2500));if(!same())return;const thumb=await snapshot();if(!same())return;
   await store.put('hist',{seed:sd,kind:kd,name:document.getElementById('name').textContent,savedAt:Date.now(),thumb});
   const h=await store.list('hist');for(const x of h.slice(40))await store.del('hist',recKey(x));if(!shelf.hidden)renderCards();}
@@ -2742,12 +2742,12 @@ function frameBody(now){
   camera.position.set(walker.pos.x,walker.pos.y+Math.sin(walker.dist*2.4)*.05*Math.min(1,walker.v)+Math.sin(t*.4)*.03,walker.pos.z);
   ld.set(Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el));camera.lookAt(camera.position.x+ld.x,camera.position.y+ld.y,camera.position.z+ld.z);
   setListener(ac);setListener(fxAc);
-  {const V=tripT&&tripT.v,I=V&&V.userData.interior;if(I&&V.parent){cabinLight.intensity=.7;cabinLight.position.copy(I.userData.lampAt);I.localToWorld(cabinLight.position);}else cabinLight.intensity=0;}try{tick(t,dt,skyK);}catch(err){if(frameErr++<5)console.error('tick',err);}if(envDirty||now-envAt>9000){envAt=now;envDirty=0;envUpdate();}tripFog();dbSync();if(dboard.pending)dbUpload();if(!(compiling&&performance.now()-compileAt<4000))renderer.render(scene,camera);tripFogEnd();if(standby==='none')grainTick(now);
+  {const V=tripT&&tripT.v,I=V&&V.userData.interior;if(I&&V.parent){cabinLight.intensity=.7;cabinLight.position.copy(I.userData.lampAt);I.localToWorld(cabinLight.position);}else cabinLight.intensity=0;}try{tick(t,dt,skyK);}catch(err){if(frameErr++<5)console.error('tick',err);}if(envDirty||now-envAt>9000){envAt=now;envDirty=0;envUpdate();}tripFog();dbSync();if(dboard.pending)dbUpload();{const uk=Math.max(0,Math.min(1,(-camera.matrixWorld.elements[9]-.22)/.25)),nt=tod<6.5||tod>18.5;consLines.forEach(c=>{if(c.always||nt)c.m.opacity=Math.max(c.m.opacity,uk*.62);});}if(!(compiling&&performance.now()-compileAt<4000))renderer.render(scene,camera);tripFogEnd();if(standby==='none')grainTick(now);
   if(!fpsDone&&standby==='none'&&t>5){fpsAcc+=dt;fpsN++;if(fpsAcc>8){fpsDone=true;const avg=fpsN/fpsAcc;if(avg<30&&!qualLight){qualLight=true;applyQuality();toast('この端末に合わせて描画を軽くしました（影なし）。設定の「描画」で戻せます');}}}
   if(fullReq){const f=fullReq;fullReq=null;try{renderer.domElement.toBlob(b=>f(b),'image/png');}catch(e){f(null);}}
   if(shotReq){const c=cv(320,180);c.getContext('2d').drawImage(renderer.domElement,0,0,320,180);const f=shotReq;shotReq=null;try{f(c.toDataURL('image/jpeg',.62));}catch(e){f(null);}}
   const w=window.innerWidth,h=window.innerHeight;
-  const upK=Math.max(0,Math.min(1,(camera.matrixWorld.elements[9]*-1-.22)/.25));labels.forEach(l=>{v.copy(l.pos);l.grp.localToWorld(v);v.project(camera);const on=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;l.boost=Math.max(0,(l.boost||0)-dt*.2);const nt=l.lm?l.lm.opacity>.05:(l.always||tod<6.5||tod>18.5);l.el.style.opacity=on?Math.max(skyK*(nt?.9:.62),nt?upK*.88:0,Math.min(1,l.boost*1.5)):0;if(on){l.el.style.left=((v.x*.5+.5)*w)+'px';l.el.style.top=((-v.y*.5+.5)*h)+'px';}});
+  const upK=Math.max(0,Math.min(1,(camera.matrixWorld.elements[9]*-1-.22)/.25));labels.forEach(l=>{v.copy(l.pos);l.grp.localToWorld(v);v.project(camera);const on=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;l.boost=Math.max(0,(l.boost||0)-dt*.2);const nt=l.always||tod<6.5||tod>18.5;l.el.style.opacity=on?Math.max(skyK*(nt?.9:.62),nt?upK*.88:0,Math.min(1,l.boost*1.5)):0;if(on){l.el.style.left=((v.x*.5+.5)*w)+'px';l.el.style.top=((-v.y*.5+.5)*h)+'px';}});
   nextFrame();
 }
 /* ================= 旅: 世界どうしを乗り物でつなぐ ================= */
