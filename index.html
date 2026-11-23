@@ -2265,6 +2265,7 @@ let fxAc=null,fxG2=null;
 function fxOut(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!fxAc){fxAc=new AC();const C=fxAc,g=C.createGain(),cp=C.createDynamicsCompressor();cp.threshold.value=-14;cp.ratio.value=4;cp.connect(C.destination);g.gain.value=Math.max(.2,vol);g.connect(cp);
     const d=C.createDelay(2);d.delayTime.value=.42;const fb=C.createGain();fb.gain.value=.35;const lp=C.createBiquadFilter();lp.frequency.value=1800;g.connect(d);d.connect(lp);lp.connect(fb);fb.connect(d);lp.connect(C.destination);fxG2=g;}
   fxAc.resume();fxG2.gain.value=Math.max(.2,vol);return fxG2;}
+['pointerdown','keydown','touchend'].forEach(t=>addEventListener(t,()=>{if(!soundOn)return;const o=fxOut();if(o&&!o.context._unl){o.context._unl=1;try{const b=o.context.createBuffer(1,1,22050),sr=o.context.createBufferSource();sr.buffer=b;sr.connect(o.context.destination);sr.start(0);}catch(_){}}},{capture:true,passive:true}));
 function spatial(dest,pos){const C=dest.context;if(!pos||!C.createPanner)return dest;const p=C.createPanner();p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=18;p.rolloffFactor=.7;p.maxDistance=2000;
   if(p.positionX){p.positionX.value=pos[0];p.positionY.value=pos[1];p.positionZ.value=pos[2];}else p.setPosition(pos[0],pos[1],pos[2]);p.connect(dest);return p;}
 function toneTo(dest,f,g0,at,dur,type,delay,bend){const C=dest.context,w=C.currentTime+(delay||0),o=C.createOscillator(),g=C.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,w);if(bend)o.frequency.exponentialRampToValueAtTime(bend,w+dur*.6);
@@ -2340,7 +2341,7 @@ function pathCut(st,pts){const objs=pickables.filter(o=>{let x=o,k=null;while(x&
 function goHome(){if(traveling)return;const c=info.cam,w=walker.car,via=info.way?info.way([w.x,w.z],[c[0],c[2]]):null;walker.goalQ=null;if(via&&via.length){walker.goalQ=via.slice(1).concat([[c[0],c[2],c[1]]]);walker.goal.set(via[0][0],0,via[0][1]);}else walker.goal.set(c[0],c[1],c[2]);walker.mode='home';resetLook=true;if(walkOn)setWalk(false,true);}
 let lastStep=0;
 /* 汽車の音: 遠い汽笛・到着（蒸気と制動）・出発（長い汽笛）・走行の蒸気 */
-function trainSound(kind,pos,q){if(!soundOn)return;const out=fxOut();if(!out)return;const C=out.context,dest=spatial(out,pos?[pos.x,pos.y,pos.z]:null),Q=q==null?1:q;
+function trainSound(kind,pos,q){if(!soundOn)return;const out=fxOut();if(!out)return;const C=out.context,boost=C.createGain();boost.gain.value=3;boost.connect(out);const dest=spatial(boost,pos?[pos.x,pos.y,pos.z]:null),Q=q==null?1:q;if(dest!==boost){dest.refDistance=55;dest.rolloffFactor=.4;}
   if(!C._nb){const b=C.createBuffer(1,C.sampleRate*.4,C.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;C._nb=b;}
   const whistle=(f,dur,g,delay)=>{const w=C.currentTime+(delay||0),G=g*Q*2.2,bus=C.createGain();bus.gain.setValueAtTime(0,w);bus.gain.linearRampToValueAtTime(G,w+.16);bus.gain.setValueAtTime(G,w+Math.max(.2,dur-.35));bus.gain.exponentialRampToValueAtTime(.0004,w+dur+.25);
     const lp=C.createBiquadFilter();lp.type='lowpass';lp.frequency.value=3200;bus.connect(lp);lp.connect(dest);
@@ -2362,8 +2363,8 @@ function clack(C,dest,delay,g){const src=C.createBufferSource();src.buffer=C._nb
 function rideAudio(dt,vel){if(!soundOn||vel<=.2){if(rideR){rideR.g.gain.setTargetAtTime(0,rideR.C.currentTime,.5);if(vel<=.2&&rideR.C.currentTime-rideR.off>3&&rideR.off>0){}}return;}
   const out=fxOut();if(!out)return;const C=out.context;if(!C._nb){const b=C.createBuffer(1,C.sampleRate*.4,C.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;C._nb=b;}
   if(!rideR){const src=C.createBufferSource();src.buffer=C._nb;src.loop=true;const f=C.createBiquadFilter();f.type='lowpass';f.frequency.value=160;f.Q.value=.7;const g=C.createGain();g.gain.value=0;src.connect(f);f.connect(g);g.connect(out);src.start();rideR={C,src,f,g,off:0};}
-  rideR.g.gain.setTargetAtTime(Math.min(.26,.05+vel*.009),C.currentTime,.4);rideR.f.frequency.setTargetAtTime(120+vel*7,C.currentTime,.4);
-  clackT-=dt;if(clackT<=0){clackT=Math.max(.42,16/Math.max(vel,1));const g=Math.min(.2,.05+vel*.006);clack(C,out,0,g);clack(C,out,.11+6/Math.max(vel,4)*.05,g*.8);}
+  rideR.g.gain.setTargetAtTime(Math.min(.42,.09+vel*.014),C.currentTime,.4);rideR.f.frequency.setTargetAtTime(120+vel*7,C.currentTime,.4);
+  clackT-=dt;if(clackT<=0){clackT=Math.max(.42,16/Math.max(vel,1));const g=Math.min(.32,.09+vel*.01);clack(C,out,0,g);clack(C,out,.11+6/Math.max(vel,4)*.05,g*.8);}
   rideCh-=dt;if(rideCh<=0){rideCh=Math.max(.24,1.5-vel*.05);trainSound('chuff',null,Math.min(.9,.35+vel*.02));}}
 addEventListener('pointerdown',()=>{if(soundOn)fxOut();},{capture:true,passive:true});addEventListener('keydown',()=>{if(soundOn)fxOut();},{capture:true,passive:true});
 function stepSound(){const W=walker;if(!soundOn||W.v<.2||W.dist-lastStep<1.3)return;lastStep=W.dist;const out=fxOut();if(!out)return;const C=out.context;
@@ -2742,12 +2743,12 @@ function frameBody(now){
   camera.position.set(walker.pos.x,walker.pos.y+Math.sin(walker.dist*2.4)*.05*Math.min(1,walker.v)+Math.sin(t*.4)*.03,walker.pos.z);
   ld.set(Math.sin(az)*Math.cos(el),Math.sin(el),Math.cos(az)*Math.cos(el));camera.lookAt(camera.position.x+ld.x,camera.position.y+ld.y,camera.position.z+ld.z);
   setListener(ac);setListener(fxAc);
-  {const V=tripT&&tripT.v,I=V&&V.userData.interior;if(I&&V.parent){cabinLight.intensity=.7;cabinLight.position.copy(I.userData.lampAt);I.localToWorld(cabinLight.position);}else cabinLight.intensity=0;}try{tick(t,dt,skyK);}catch(err){if(frameErr++<5)console.error('tick',err);}if(envDirty||now-envAt>9000){envAt=now;envDirty=0;envUpdate();}tripFog();dbSync();if(dboard.pending)dbUpload();{const uk=Math.max(0,Math.min(1,(-camera.matrixWorld.elements[9]-.22)/.25)),nt=tod<6.5||tod>18.5;consLines.forEach(c=>{if(c.always||nt)c.m.opacity=Math.max(c.m.opacity,uk*.62);});}if(!(compiling&&performance.now()-compileAt<4000))renderer.render(scene,camera);tripFogEnd();if(standby==='none')grainTick(now);
+  {const V=tripT&&tripT.v,I=V&&V.userData.interior;if(I&&V.parent){cabinLight.intensity=.7;cabinLight.position.copy(I.userData.lampAt);I.localToWorld(cabinLight.position);}else cabinLight.intensity=0;}try{tick(t,dt,skyK);}catch(err){if(frameErr++<5)console.error('tick',err);}if(envDirty||now-envAt>9000){envAt=now;envDirty=0;envUpdate();}tripFog();dbSync();if(dboard.pending)dbUpload();{const uk=Math.max(0,Math.min(1,(-camera.matrixWorld.elements[9]-.22)/.25)),nt=tod<6.5||tod>18.5;consLines.forEach(c=>{c.m.opacity=Math.max(c.m.opacity,uk*(c.always||nt?.62:.48));});}if(!(compiling&&performance.now()-compileAt<4000))renderer.render(scene,camera);tripFogEnd();if(standby==='none')grainTick(now);
   if(!fpsDone&&standby==='none'&&t>5){fpsAcc+=dt;fpsN++;if(fpsAcc>8){fpsDone=true;const avg=fpsN/fpsAcc;if(avg<30&&!qualLight){qualLight=true;applyQuality();toast('この端末に合わせて描画を軽くしました（影なし）。設定の「描画」で戻せます');}}}
   if(fullReq){const f=fullReq;fullReq=null;try{renderer.domElement.toBlob(b=>f(b),'image/png');}catch(e){f(null);}}
   if(shotReq){const c=cv(320,180);c.getContext('2d').drawImage(renderer.domElement,0,0,320,180);const f=shotReq;shotReq=null;try{f(c.toDataURL('image/jpeg',.62));}catch(e){f(null);}}
   const w=window.innerWidth,h=window.innerHeight;
-  const upK=Math.max(0,Math.min(1,(camera.matrixWorld.elements[9]*-1-.22)/.25));labels.forEach(l=>{v.copy(l.pos);l.grp.localToWorld(v);v.project(camera);const on=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;l.boost=Math.max(0,(l.boost||0)-dt*.2);const nt=l.always||tod<6.5||tod>18.5;l.el.style.opacity=on?Math.max(skyK*(nt?.9:.62),nt?upK*.88:0,Math.min(1,l.boost*1.5)):0;if(on){l.el.style.left=((v.x*.5+.5)*w)+'px';l.el.style.top=((-v.y*.5+.5)*h)+'px';}});
+  const upK=Math.max(0,Math.min(1,(camera.matrixWorld.elements[9]*-1-.22)/.25));labels.forEach(l=>{v.copy(l.pos);l.grp.localToWorld(v);v.project(camera);const on=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;l.boost=Math.max(0,(l.boost||0)-dt*.2);const nt=l.always||tod<6.5||tod>18.5;l.el.style.opacity=on?Math.max(skyK*(nt?.9:.62),upK*(nt?.88:.72),Math.min(1,l.boost*1.5)):0;if(on){l.el.style.left=((v.x*.5+.5)*w)+'px';l.el.style.top=((-v.y*.5+.5)*h)+'px';}});
   nextFrame();
 }
 /* ================= 旅: 世界どうしを乗り物でつなぐ ================= */
