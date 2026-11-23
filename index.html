@@ -2322,7 +2322,7 @@ function walkerReset(){const c=info.cam;walker.pos.set(c[0],c[1],c[2]);walker.ca
   walker.stops=r.stops.map(s=>({u:nearestU(r.pts[s.i][0],r.pts[s.i][1]),look:s.look,dur:s.dur||7}));walker.lastStop=null;if(walkOn)startRoute();}
 function startRoute(){walker.mode='route';walker.loopD=0;walker.u=nearestU(walker.pos.x,walker.pos.z);walker.stopT=0;walker.lastStop=null;}
 function widen(pts,cx,cz,f){return pts.map((p,i)=>i===0?p:[cx+(p[0]-cx)*f,cz+(p[1]-cz)*f]);}
-function goTo(p){if(traveling)return;const w=walker.car;let c=info.clamp(p.x,p.z);if(Math.hypot(c[0]-p.x,c[1]-p.z)>2){let best=null;for(let i=1;i<=60;i++){const k=i/60,x=w.x+(p.x-w.x)*k,z=w.z+(p.z-w.z)*k,q=info.clamp(x,z);if(Math.hypot(q[0]-x,q[1]-z)<1)best=q;}if(best&&Math.hypot(best[0]-w.x,best[1]-w.z)>Math.hypot(c[0]-w.x,c[1]-w.z)*.6)c=best;}let path=(info.way&&info.way([w.x,w.z],c))||[];path=pathCut([w.x,w.z],path.concat([c]));if(!path.length)return;walker.goalQ=path.slice(1);walker.goal.set(path[0][0],0,path[0][1]);walker.mode='goto';if(walkOn)setWalk(false,true);}
+function goTo(p){if(traveling)return;const w=walker.car;let c=info.clamp(p.x,p.z);if(Math.hypot(c[0]-p.x,c[1]-p.z)>2){let best=null;for(let i=1;i<=60;i++){const k=i/60,x=w.x+(p.x-w.x)*k,z=w.z+(p.z-w.z)*k,q=info.clamp(x,z);if(Math.hypot(q[0]-x,q[1]-z)<1)best=q;}if(best&&Math.hypot(best[0]-w.x,best[1]-w.z)>Math.hypot(c[0]-w.x,c[1]-w.z)*.6)c=best;}let path=(info.way&&info.way([w.x,w.z],c))||[];path=pathCut([w.x,w.z],path.concat([c]));if(!path.length)return;walker.goalQ=path.slice(1);walker.goal.set(path[0][0],0,path[0][1]);walker.mode='goto';resetLook=true;if(walkOn)setWalk(false,true);}
 /* 道筋に家や木などがあれば、その手前で止まる（壁抜け・地中抜けを防ぐ） */
 const _dn=new T.Raycaster(),_dv=new T.Vector3(0,-1,0),_o3=new T.Vector3(),NOBLOCK={ground:1,land:1,water:1,moon:1,train:1,beast:1,bird:1,fish:1,flower:1,station:1};
 function pathCut(st,pts){const objs=pickables.filter(o=>{let x=o,k=null;while(x&&!k){k=x.userData.pick||null;x=x.parent;}if(NOBLOCK[k])return false;for(let y=o;y;y=y.parent)if(!y.visible)return false;return true;});
@@ -2405,12 +2405,12 @@ function walkerUpdate(dt,t){const W=walker;
       const a=W.curve.getPointAt((W.u+7/W.len)%1);W.tAz=Math.atan2(a.x-W.pos.x,a.z-W.pos.z)+Math.sin(t*.19)*.22;W.tEl=-.04+Math.sin(t*.13)*.05;}
     W.v+=(target-W.v)*Math.min(1,dt*(target<W.v?1.4:.45));if(W.stopT<=0&&W.v<.03&&target>.5)W.v=.03;
     W.u=(W.u+W.v*dt/W.len)%1;const p=W.curve.getPointAt(W.u);W.car.set(p.x,info.eye(p.x,p.z),p.z);W.dist+=W.v*dt;growAdd(W.v*dt);stepSound();}
-  else if(W.mode==='goto'||W.mode==='home'){const g=W.goal,dx=g.x-W.car.x,dz=g.z-W.car.z,d=Math.hypot(dx,dz),more=W.goalQ&&W.goalQ.length,target=(d<3&&!more)?.15+d*.3:Math.min(3.2,1.2+d*.06)*(W.hurry||1);W.v+=(target-W.v)*Math.min(1,dt*.9);
+  else if(W.mode==='goto'||W.mode==='home'){const g=W.goal,dx=g.x-W.car.x,dz=g.z-W.car.z,d=Math.hypot(dx,dz),more=W.goalQ&&W.goalQ.length,hd=Math.atan2(dx,dz),herr=Math.abs(angD(hd,W.az)),target=((d<3&&!more)?.15+d*.3:Math.min(3.2,1.2+d*.06)*(W.hurry||1))*(d>1.2?Math.max(0,1-herr/1.1):1);W.v+=(target-W.v)*Math.min(1,dt*(target<W.v?2.5:.9));if(d>1.2){W.tAz=hd;W.tEl=-.04;}
     if(more&&d<.8){const n=W.goalQ.shift();W.goal.set(n[0],n.length>2?n[2]:0,n[1]);}
     else if(d<.12){W.v=0;if(W.mode==='home'){W.car.copy(g);const fa=frontAngles();W.tAz=fa[0];W.tEl=fa[1];W.mode='idle';}else{W.mode='arrived';W.arrT=0;W.arrAz=W.az;if(!traveling&&((info.station&&W.car.distanceTo(info.station.board)<6)||(lightsG&&lightsG.children.some(g=>W.car.distanceTo(g.userData.gatePos)<5))))showGateChip();}}
-    else{const s=Math.min(d,Math.max(.02,W.v)*dt);W.car.x+=dx/d*s;W.car.z+=dz/d*s;W.car.y=info.eye(W.car.x,W.car.z);if(d>2){W.tAz=Math.atan2(dx,dz);W.tEl=-.04;}W.dist+=s;growAdd(s);stepSound();}}
+    else{const s=Math.min(d,Math.max(.02,W.v)*dt);W.car.x+=dx/d*s;W.car.z+=dz/d*s;W.car.y=info.eye(W.car.x,W.car.z);W.dist+=s;growAdd(s);stepSound();}}
   else if(W.mode==='arrived'){W.arrT+=dt;const k=Math.max(0,1-W.arrT/10);W.tAz=W.arrAz+Math.sin(W.arrT*.6)*.9*k;W.tEl=.03;if(W.arrT>10)W.mode='idle';}
-  W.pos.lerp(W.car,Math.min(1,dt*3));if(!traveling){W.pos.y+=(W.car.y-W.pos.y)*Math.min(1,dt*5);const fy=info.eye(W.pos.x,W.pos.z)-.4;if(W.pos.y<fy)W.pos.y=fy;}W.az+=angD(W.tAz,W.az)*Math.min(1,dt*.8);W.el+=(W.tEl-W.el)*Math.min(1,dt*.8);}
+  W.pos.lerp(W.car,Math.min(1,dt*3));if(!traveling){W.pos.y+=(W.car.y-W.pos.y)*Math.min(1,dt*5);const fy=info.eye(W.pos.x,W.pos.z)-.4;if(W.pos.y<fy)W.pos.y=fy;}{const tr=(W.mode==='goto'||W.mode==='home')?1.8:.8;W.az+=angD(W.tAz,W.az)*Math.min(1,dt*tr);W.el+=(W.tEl-W.el)*Math.min(1,dt*.8);}}
 
 /* ---- 指の操作の振り分け ---- */
 let ptr=null,lastTap={t:0,x:0,y:0};
